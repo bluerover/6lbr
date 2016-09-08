@@ -264,6 +264,9 @@ dio_input(void)
       goto discard;
     }
   } else {
+    //refresh nbr
+    nbr->state = NBR_REACHABLE;
+    stimer_set(&nbr->reachable, UIP_ND6_REACHABLE_TIME / 1000);
     PRINTF("RPL: Neighbor already in neighbor cache\n");
   }
 
@@ -774,6 +777,9 @@ dao_input(void)
       goto discard;
     }
   } else {
+    // refreash nbr
+    nbr->state = NBR_REACHABLE;
+    stimer_set(&nbr->reachable, UIP_ND6_REACHABLE_TIME / 1000);
     PRINTF("RPL: Neighbor already in neighbor cache\n");
   }
 
