@@ -207,7 +207,7 @@ free_packet(struct neighbor_queue *n, struct rdc_buf_list *p)
       n->collisions = 0;
       n->deferrals = 0;
       /* Set a timer for next transmissions */
-      ctimer_set(&n->transmit_timer, default_timebase(),
+      ctimer_set(&n->transmit_timer, default_timebase()/10,
                  transmit_packet_list, n);
     } else {
       /* This was the last packet in the queue, we free the neighbor */
