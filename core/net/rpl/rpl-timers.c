@@ -162,7 +162,14 @@ handle_dio_timer(void *ptr)
   } else {
     /* check if we need to double interval */
     if(instance->dio_intcurrent < instance->dio_intmin + instance->dio_intdoubl) {
-      instance->dio_intcurrent++;
+//      instance->dio_intcurrent++;
+      //if current interval is less than the minimum interval, set it to minimum interval.
+      //This is used to jump from DIO_INT_START to dio_intmin
+      if (instance->dio_intcurrent < instance->dio_intmin)
+	instance->dio_intcurrent = instance->dio_intmin;
+      else
+	instance->dio_intcurrent++;
+
       PRINTF("RPL: DIO Timer interval doubled %d\n", instance->dio_intcurrent);
     }
     new_dio_interval(instance);
@@ -183,17 +190,27 @@ rpl_reset_periodic_timer(void)
 }
 /*---------------------------------------------------------------------------*/
 /* Resets the DIO timer in the instance to its minimal interval. */
+// DIO interval after reset. This is set to 9 or 2^9ms or 512ms to facilitate frequency scanning
+#define DIO_INT_START 9
 void
 rpl_reset_dio_timer(rpl_instance_t *instance)
 {
 #if !RPL_LEAF_ONLY
   /* Do not reset if we are already on the minimum interval,
      unless forced to do so. */
+/*
   if(instance->dio_intcurrent > instance->dio_intmin) {
     instance->dio_counter = 0;
     instance->dio_intcurrent = instance->dio_intmin;
     new_dio_interval(instance);
   }
+*/
+  if(instance->dio_intcurrent > DIO_INT_START) {
+    instance->dio_counter = 0;
+    instance->dio_intcurrent = DIO_INT_START;
+    new_dio_interval(instance);
+  }
+
 #if RPL_CONF_STATS
   rpl_stats.resets++;
 #endif /* RPL_CONF_STATS */
