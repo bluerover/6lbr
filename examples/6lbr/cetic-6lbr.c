@@ -46,10 +46,13 @@
 #include "net/netstack.h"
 #include "net/rpl/rpl.h"
 
+#include "net/rpl/rpl-private.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include "log-6lbr.h"
 
@@ -154,6 +157,9 @@ process_event_t cetic_6lbr_restart_event;
 process_event_t cetic_6lbr_reload_event;
 
 PROCESS(cetic_6lbr_process, "CETIC Bridge process");
+#if PERIODIC_DIO
+PROCESS(periodic_dio_process, "periodic DIO process");
+#endif
 
 AUTOSTART_PROCESSES(&cetic_6lbr_process);
 
@@ -565,6 +571,10 @@ dtls_init();
   dns_proxy_init();
 #endif
 
+#if PERIODIC_DIO
+	process_start(&periodic_dio_process, NULL);
+#endif
+
   platform_finalize();
   platform_load_config(CONFIG_LEVEL_APP);
 
@@ -581,3 +591,66 @@ dtls_init();
 
   PROCESS_END();
 }
+
+#if PERIODIC_DIO
+#define DIO_INTERVAL (120)
+//randomize_period randomize the period to +- variance
+//period: the nominal value
+//variance: percentage of the period that will varies
+int randomize_period(int period, float variance)
+{
+	int diff = (int)((float)period * variance);
+
+	int ret = period - diff + (random_rand() % (2*diff));	
+
+//	PRINTF("randomize_period: period=%d, diff=%d, ret=%d\n", period, diff, ret); 
+	return(ret); 	
+}
+
+unsigned long getCurrTime(void) 
+{
+	struct timeval tv;  
+    gettimeofday(&tv, NULL);  
+    return tv.tv_sec;
+}
+
+static void
+send_dio(void *ptr)
+{
+	rpl_instance_t *instance=rpl_get_default_instance();
+	if (instance != NULL)
+	{
+		int time = (int)getCurrTime();
+		printf("send DIO, time=%d\n", time);				
+		dio_output(instance, NULL);
+	}
+}
+
+PROCESS_THREAD(periodic_dio_process, ev, data)
+{
+  	static struct etimer timer;
+	static struct ctimer delay_timer;
+  	int time;
+
+  	PROCESS_BEGIN();
+  	printf("Starting periodic DIO process\n");
+  	etimer_set(&timer, CLOCK_SECOND);
+
+	while(1) 
+	{
+		if  (ev == PROCESS_EVENT_TIMER) 
+		{
+			time = (int)getCurrTime();
+			if ((time != 0) && ((time % DIO_INTERVAL) == 0))
+			{
+				printf("Periodic DIO, time=%d\n", time);				
+				ctimer_set(&delay_timer, randomize_period(CLOCK_SECOND * 10, 1), send_dio, NULL);
+			}
+			etimer_set(&timer, CLOCK_SECOND);
+		}
+		PROCESS_YIELD();
+	}
+
+  PROCESS_END();
+}
+#endif
