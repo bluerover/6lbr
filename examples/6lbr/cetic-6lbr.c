@@ -157,7 +157,7 @@ process_event_t cetic_6lbr_restart_event;
 process_event_t cetic_6lbr_reload_event;
 
 PROCESS(cetic_6lbr_process, "CETIC Bridge process");
-#if PERIODIC_DIO
+#if PERIODIC_DIO && UIP_CONF_IPV6_RPL
 PROCESS(periodic_dio_process, "periodic DIO process");
 #endif
 
@@ -571,7 +571,7 @@ dtls_init();
   dns_proxy_init();
 #endif
 
-#if PERIODIC_DIO
+#if PERIODIC_DIO && UIP_CONF_IPV6_RPL
 	process_start(&periodic_dio_process, NULL);
 #endif
 
@@ -592,7 +592,7 @@ dtls_init();
   PROCESS_END();
 }
 
-#if PERIODIC_DIO
+#if PERIODIC_DIO && UIP_CONF_IPV6_RPL
 #define DIO_INTERVAL (120)
 //randomize_period randomize the period to +- variance
 //period: the nominal value
