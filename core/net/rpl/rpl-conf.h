@@ -236,6 +236,19 @@
 #endif
 
 /*
+ * Setting the DIO_REFRESH_DAO_ROUTES will make the RPL root always
+ * increase the DTSN (Destination Advertisement Trigger Sequence Number)
+ * when sending multicast DIO. This is to get all children to re-register
+ * their DAO route. This is needed when DAO-ACK is not enabled to add 
+ * reliability to route maintenance.
+ * */
+#ifdef RPL_CONF_DIO_REFRESH_DAO_ROUTES
+#define RPL_DIO_REFRESH_DAO_ROUTES RPL_CONF_DIO_REFRESH_DAO_ROUTES
+#else
+#define RPL_DIO_REFRESH_DAO_ROUTES 1
+#endif /* RPL_CONF_DIO_REFRESH_DAO_ROUTES */
+
+/*
  * RPL probing. When enabled, probes will be sent periodically to keep
  * parent link estimates up to date.
  * */

@@ -286,5 +286,7 @@
 #define LLSEC802154_CONF_USES_ENCRYPTION 1
 
 #define PERIODIC_DIO	1
+//Disable DIOs triggering DAO message. Not needed and create a lot more traffic
+#define RPL_CONF_DIO_REFRESH_DAO_ROUTES 0
 
 #endif /* __PROJECT_6LBR_CONF_H__ */
