@@ -593,7 +593,7 @@ dtls_init();
 }
 
 #if PERIODIC_DIO && UIP_CONF_IPV6_RPL
-#define DIO_INTERVAL (120)
+#define DIO_INTERVAL (60*30)
 //randomize_period randomize the period to +- variance
 //period: the nominal value
 //variance: percentage of the period that will varies
@@ -644,7 +644,7 @@ PROCESS_THREAD(periodic_dio_process, ev, data)
 			if ((time != 0) && ((time % DIO_INTERVAL) == 0))
 			{
 				printf("Periodic DIO, time=%d\n", time);				
-				ctimer_set(&delay_timer, randomize_period(CLOCK_SECOND * 10, 1), send_dio, NULL);
+				ctimer_set(&delay_timer, randomize_period(CLOCK_SECOND * 10, 0.7), send_dio, NULL);
 			}
 			etimer_set(&timer, CLOCK_SECOND);
 		}
